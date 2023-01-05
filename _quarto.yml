@@ -1,0 +1,7 @@
+project:
+  title: "Opros"
+  type: website
+  output-dir: docs
+
+editor: visual
+

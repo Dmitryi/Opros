@@ -1,0 +1,361 @@
+---
+title: "Опрос"
+subtitle: "Сотрудников 'Кама-Гэймз', декабрь 2022 г."
+format:
+  html:
+    page-layout: article
+    theme: pulse
+    fontsize: 1.1em
+    linestretch: 1.7
+    code-fold: true
+    code-tools: true
+    highlight-style: ayu
+    toc: true
+    toc-location: right
+---
+
+## Вводная информация
+
+В опросе приняло участие 158 сотрудника из различных отделов. Опрос состоял из 23 утверждения, которые требовали ответа да или нет, и 4 вопроса с ответами в свободной форме.
+
+1. Я знаю, чего от меня ожидает компания
+2. Мой руководитель ставит четкие цели для нашей команды
+3. Я вижу прямую связь между тем, что я делаю и успехами компании
+4. В компании есть тот, кто помогает мне развиваться профессионально
+5. Мой руководитель дает мне обратную связь, которая помогает улучшить мою работу
+6. Я знаю, как пройти обучение и с кем в компании можно его обсудить
+7. В компании есть возможности для моего роста и развития
+8. Компания предоставляет мне все необходимые ресурсы для работы
+9. Меня устраивает мой компьютер и остальная рабочая техника
+10. Если в работе что-то идет не по плану, я всегда знаю, кого попросить о помощи
+11. Мой руководитель регулярно делится со мной актуальной информацией о целях компании
+12. Я понимаю, куда движется компания и как она планирует развиваться
+13. Я узнаю новости о изменениях в компании вовремя
+14. Я знаю, какие роли у ребят в других командах и какими навыками они обладают
+15. Если я захочу найти в компании эксперта в какой-то области, то легко это сделаю, даже не зная его имени
+16. Я общаюсь с коллегами за пределами своей команды и/или рабочей группы
+17. У меня на работе есть друг
+18. В большинстве случаев мои коллеги качественно выполняют свою работу
+19. Коллеги всегда оперативно реагируют на мои сообщения и не пропускают их
+20. Я никогда не пропускаю сообщения от коллег или руководителя
+21. Я всегда знаю, в какой чат мне написать с вопросом или предложением
+22. Меня никогда не забывали добавить в нужный рабочий чат
+23. Я готов рекомендовать нашу компанию своим друзьям и знакомым
+24. Какие изменения за последний год тебя порадовали?
+25. Что тебе нравится в компании меньше всего?
+26. Есть ли в компании что-то, что тормозит твою работу?
+27. Оставь любой комментарий и мы его прочитаем :)
+
+Количество участников опроса достаточно для проведения статистического анализа с помощью корреляционного регрессионного анализа. А так же лингвистического анализа ответов последних четырёх ответов. Ниже представлена таблица с результатами сырых данных. Для корреляционного и регрессионного анализа все ответы "Да" были переведены в 1 (единицу), ответы "Нет" - 0 (ноль).
+
+```{r, attr.output='style="max-height: 100px;"'}
+#| echo: false
+library(data.table)
+library(kableExtra)
+file0 <- fread("Opros0.csv")
+file <- fread("opros.csv")
+nms <- c("qst1", "qst2", "qst3", "qst4", "qst5", "qst6", "qst7", "qst8", "qst9", "qst10", "qst11", "qst12", "qst13", "qst14", "qst15", "qst16", "qst17", "qst18", "qst19", "qst20", "qst21", "qst22", "qst23")
+setnames(file, nms)
+kbl(file0, align = "c")%>%
+  kable_paper("hover", full_width = F) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  scroll_box(width = "100%", height = "700px")
+```
+
+## Корреляционный анализ
+
+Корреляционный анализ проводится для выявления наличия или отсутствия связи между группами данных. Для того что бы нагляднее увидеть признаков наличия связи необходимо построить график и выделить значения, которые нам показывают на наличие связи. На графике ниже видно, что обнаружена корреляционная связь средней степени между утверждениями 2 и 5, а так же 11 и 12. Напомню эти утверждения.
+
+**Группа 1**
+
+2. Мой руководитель ставит четкие цели для нашей команды
+5. Мой руководитель дает мне обратную связь, которая помогает улучшить мою работу
+
+**Группа 2**
+
+11. Мой руководитель регулярно делится со мной актуальной информацией о целях компании
+12. Я понимаю, куда движется компания и как она планирует развиваться
+
+Для первой группы коэфициэнт корреляции составляет 0,5, для второй группы - 0,6. Несмотря на то что коэфициэнты показывают средний уровень связи между утверждениями данные необходимо изучить и выполнить регрессионный анализ. В дальнейшем это поможет сделать первоначальные выводы, опираясь на которые в будущем можно строить гипотезы.
+
+На графике обозначения qst1, qst2, qst3 ... означают порядковые номера утверждений и вопросов.
+
+```{r}
+#| warning: false
+#| echo: false
+library(GGally)
+ggcorr(file[ ,1:15], nbreaks = 7, palette = "Set3", label = TRUE, label_size = 5, label_color = "white")
+```
+
+## Регрессионный анализ
+
+#### Группа 1
+
+**t-критерий Стьюдента**
+
+```{r}
+#| echo: false
+
+t.test(file$qst2 ~ file$qst5)
+
+```
+
+Мы видим, что p-value = 0.0009379, что ниже принятого уровня значимости 0.05. Следовательно ответы респондентов в утверждениях статистически значимо различаются. Следовательно мы можем отвергнуть нулевую гипотезу о равенстве средних значений, при этом риск ошибки составит около 0.1%. 
+
+**Линейная регрессия**
+
+```{r}
+#| echo: false
+
+summary(lm(qst2 ~ qst5, data = file))
+```
+
+Предикторы совокупности ответов на второе (2e-16 < 0,05), и пятое утверждение (1.67e-11 < 0,05) являются статистически значимыми. А следовательно переменные-предикторы полезны для прогнозирования значения переменной. Однако переменные-предикторы способны предсказать значение переменной только в 25% случаях. А так же регрессионная модель соответствует данным (0.2472). Значение F-statistic равно 52.78. Данное значение можно проинтерпритировать как влияение одних переменных на другие в 52% случаях.
+
+***
+
+#### Группа 2
+
+**t-критерий Стьюдента**
+
+```{r}
+#| echo: false
+
+t.test(file$qst11 ~ file$qst12)
+```
+
+Мы видим, что p-value = 1.586e-12, что ниже принятого уровня значимости 0.05.   Следовательно ответы респондентов в утверждениях статистически значимо различаются. Следовательно мы можем отвергнуть нулевую гипотезу о равенстве средних значений, при этом риск ошибки составит около 0.1%.
+
+**Линейная регрессия**
+
+```{r}
+#| echo: false
+
+summary(lm(qst11 ~ qst12, data = file))
+```
+
+Предикторы совокупности ответов на одинадцатое (2.46e-09 < 0,05), и двенадцатое утверждение (2e-16 < 0,05) являются статистически значимыми. А следовательно переменные-предикторы полезны для прогнозирования значения переменной. Однако переменные-предикторы способны предсказать значение переменной только в 35% случаях. А так же регрессионная модель соответствует данным (0.3765). Значение F-statistic равно 85.06. Данное значение можно проинтерпритировать как влияение одних переменных на другие в 85% случаях.
+
+## Выводы
+
+В результате полученных данных можно допустить следующие предположения.
+
+1. На улучшение работы сотрудников влияют и умение ставить чёткие цели, а так же обратная связь от руководителя.
+2. У сотрудников появляется более точное представление о том в каком направлении развивается компания в результате информирования со стороны руководителя.
+3. В первом случае эффект улучшения работы сотрудников не столь велик от обратной связи, однако скорее всего для сотрудников это важный момент в работе.
+4. Во втором случае информирование со стороны руководителей о целях компании более значимо влияет на ожидания в будущем у сотрудников.
+
+## Какие изменения за последний год тебя порадовали?
+
+```{r}
+#| warning: false
+#| echo: false
+library(readtext)
+library(udpipe)
+library(tm)
+library(tidytext)
+library(stopwords)
+library(DT)
+library(wesanderson)
+library(purrr)
+library(dplyr)
+library(tidyr)
+```
+
+**Часто встречающиейся слова**
+
+```{r, attr.output='style="max-height: 300px;"'}
+#| warning: false
+#| echo: false
+
+txt1 <- readtext(paste0("Какие изменения за последний год тебя порадовали?.docx"))
+rumodel <- udpipe_load_model("russian-syntagrus-ud-2.5-191206.udpipe")
+ru_sentiments <- read.csv("https://raw.githubusercontent.com/agricolamz/2020_HSE_DPO/master/data/ru_sentiment_linis-crowd.csv")
+mystopword <- stopwords("ru", source = "stopwords-iso")
+stopwords <- c(stopwords("ru"), mystopword)
+mycorpus <- Corpus(VectorSource(txt1$text))
+mycorpus <- tm_map(mycorpus, content_transformer(tolower))
+mycorpus <- tm_map(mycorpus, removeWords, stopwords)
+mycorpus <- tm_map(mycorpus, removePunctuation)
+mycorpus <- tm_map(mycorpus, removeNumbers)
+corpus <- tm_map(mycorpus, stripWhitespace)
+txt1 <- data.frame(text = get("content", corpus))
+txt1$text <- (gsub('[0-9.]', '', txt1$text))
+txt10 <- txt1 %>% 
+      unnest_tokens(output = "word", input = text) %>% 
+      count(word, sort = TRUE) %>% 
+      anti_join(get_stopwords("ru", "snowball"))
+
+txt11 <- txt1 %>% 
+      unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
+      separate(bigram, into = c("word1", "word2"), sep = " ") %>%
+      filter(!word1 %in% stopwords,
+             !word2 %in% stopwords) %>%
+      filter(nchar(word1)>1 & nchar(word2)>1) %>%
+      unite(bigram, c(word1, word2), sep = " ") %>% 
+      count(bigram, sort = T)
+
+txt10 %>%
+  kable("html", align = 'c') %>%
+  kable_styling(full_width = F, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+```
+
+**Часто встречающиеся фразы**
+
+```{r}
+#| warning: false
+#| echo: false
+
+txt11 %>%
+  kable("html", align = 'c') %>%
+  kable_styling(full_width = F, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+```
+
+## Что тебе нравится в компании меньше всего?
+
+**Часто встречающиейся слова**
+
+```{r, attr.output='style="max-height: 300px;"'}
+#| warning: false
+#| echo: false
+
+txt2 <- readtext(paste0("Что тебе нравится в компании меньше всего?.docx"))
+mycorpus <- Corpus(VectorSource(txt2$text))
+mycorpus <- tm_map(mycorpus, content_transformer(tolower))
+mycorpus <- tm_map(mycorpus, removeWords, stopwords)
+mycorpus <- tm_map(mycorpus, removePunctuation)
+mycorpus <- tm_map(mycorpus, removeNumbers)
+corpus <- tm_map(mycorpus, stripWhitespace)
+txt2 <- data.frame(text = get("content", corpus))
+txt2$text <- (gsub('[0-9.]', '', txt2$text))
+txt21 <- txt2 %>% 
+      unnest_tokens(output = "word", input = text) %>% 
+      count(word, sort = TRUE) %>% 
+      anti_join(get_stopwords("ru", "snowball"))
+
+txt22 <- txt2 %>% 
+      unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
+      separate(bigram, into = c("word1", "word2"), sep = " ") %>%
+      filter(!word1 %in% stopwords,
+             !word2 %in% stopwords) %>%
+      filter(nchar(word1)>1 & nchar(word2)>1) %>%
+      unite(bigram, c(word1, word2), sep = " ") %>% 
+      count(bigram, sort = T)
+
+txt21 %>%
+  kable("html", align = 'c') %>%
+  kable_styling(full_width = F, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+```
+
+**Часто встречающиеся фразы**
+
+```{r}
+#| warning: false
+#| echo: false
+
+txt22 %>%
+  kable("html", align = 'c') %>%
+  kable_styling(full_width = F, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+```
+
+## Есть ли в компании что-то, что тормозит твою работу?
+
+**Часто встречающиейся слова**
+
+```{r, attr.output='style="max-height: 300px;"'}
+#| warning: false
+#| echo: false
+
+txt3 <- readtext(paste0("Есть ли в компании что-то, что тормозит твою работу?.docx"))
+mycorpus <- Corpus(VectorSource(txt3$text))
+mycorpus <- tm_map(mycorpus, content_transformer(tolower))
+mycorpus <- tm_map(mycorpus, removeWords, stopwords)
+mycorpus <- tm_map(mycorpus, removePunctuation)
+mycorpus <- tm_map(mycorpus, removeNumbers)
+corpus <- tm_map(mycorpus, stripWhitespace)
+txt3 <- data.frame(text = get("content", corpus))
+txt3$text <- (gsub('[0-9.]', '', txt3$text))
+txt31 <- txt3 %>% 
+      unnest_tokens(output = "word", input = text) %>% 
+      count(word, sort = TRUE) %>% 
+      anti_join(get_stopwords("ru", "snowball"))
+
+txt32 <- txt3 %>% 
+      unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
+      separate(bigram, into = c("word1", "word2"), sep = " ") %>%
+      filter(!word1 %in% stopwords,
+             !word2 %in% stopwords) %>%
+      filter(nchar(word1)>1 & nchar(word2)>1) %>%
+      unite(bigram, c(word1, word2), sep = " ") %>% 
+      count(bigram, sort = T)
+
+txt31 %>%
+  kable("html", align = 'c') %>%
+  kable_styling(full_width = F, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+```
+
+**Часто встречающиеся фразы**
+
+```{r}
+#| warning: false
+#| echo: false
+
+txt32 %>%
+  kable("html", align = 'c') %>%
+  kable_styling(full_width = F, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+```
+
+## Оставь любой комментарий мы его прочитаем.
+
+**Часто встречающиейся слова**
+
+```{r, attr.output='style="max-height: 300px;"'}
+#| warning: false
+#| echo: false
+
+txt4 <- readtext(paste0("Оставь любой комментарий и мы его прочитаем.docx"))
+mycorpus <- Corpus(VectorSource(txt4$text))
+mycorpus <- tm_map(mycorpus, content_transformer(tolower))
+mycorpus <- tm_map(mycorpus, removeWords, stopwords)
+mycorpus <- tm_map(mycorpus, removePunctuation)
+mycorpus <- tm_map(mycorpus, removeNumbers)
+corpus <- tm_map(mycorpus, stripWhitespace)
+txt4 <- data.frame(text = get("content", corpus))
+txt4$text <- (gsub('[0-9.]', '', txt4$text))
+txt41 <- txt4 %>% 
+      unnest_tokens(output = "word", input = text) %>% 
+      count(word, sort = TRUE) %>% 
+      anti_join(get_stopwords("ru", "snowball"))
+
+txt42 <- txt4 %>% 
+      unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
+      separate(bigram, into = c("word1", "word2"), sep = " ") %>%
+      filter(!word1 %in% stopwords,
+             !word2 %in% stopwords) %>%
+      filter(nchar(word1)>1 & nchar(word2)>1) %>%
+      unite(bigram, c(word1, word2), sep = " ") %>% 
+      count(bigram, sort = T)
+
+txt41 %>%
+  kable("html", align = 'c') %>%
+  kable_styling(full_width = F, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+```
+
+**Часто встречающиеся фразы**
+
+```{r}
+#| warning: false
+#| echo: false
+
+txt42 %>%
+  kable("html", align = 'c') %>%
+  kable_styling(full_width = F, position = "center") %>%
+  scroll_box(width = "100%", height = "300px")
+```
